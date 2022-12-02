@@ -1,0 +1,15 @@
+{
+  "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+  "name": "mod_telegram_bot_message",
+  "version": "1.0.0",
+  "description": "",
+  "license": "GPL-2.0-or-later",
+  "assets": [
+    {
+      "name": "module.telegram-bot-message.style.css",
+      "description": "The default css style for module.",
+      "type": "style",
+      "uri": "modules/mod_telegram_bot_message/assets/css/telegram-bot.css"
+    }
+  ]
+}

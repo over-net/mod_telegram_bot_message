@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="module" version="3.1" client="site" method="upgrade">
+    <name>Telegram bot message</name>
+    <author>Mykhailo Kulyk</author>
+    <creationDate>September 2022</creationDate>
+    <copyright>(C) 2006 Open Source Matters, Inc.</copyright>
+    <license>GNU General Public License v3.0; see LICENSE.txt</license>
+    <authorEmail>info@profisite.com.ua</authorEmail>
+    <authorUrl>www.profisite.com.ua</authorUrl>
+    <version>1.0.0</version>
+    <description></description>
+    <namespace path="src">Joomla\Module\TelegramBotMessage</namespace>
+    <files>
+        <folder>assets</folder>
+        <folder>forms</folder>
+        <folder>services</folder>
+        <folder>src</folder>
+        <folder>tmpl</folder>
+        <filename module="mod_telegram_bot_message">helper.php</filename>
+        <filename module="mod_telegram_bot_message">joomla.asset.json</filename>
+    </files>
+    <languages folder="languages">
+        <language tag="en-GB">en-GB/mod_telegram_bot_message.sys.ini</language>
+        <language tag="en-GB">en-GB/mod_telegram_bot_message.ini</language>
+        <language tag="ru-RU">ru-RU/mod_telegram_bot_message.sys.ini</language>
+        <language tag="ru-RU">ru-RU/mod_telegram_bot_message.ini</language>
+        <language tag="uk-UA">uk-UA/mod_telegram_bot_message.sys.ini</language>
+        <language tag="uk-UA">uk-UA/mod_telegram_bot_message.ini</language>
+    </languages>
+    <config>
+        <fields name="params">
+
+
+            <fieldset name="basic">
+
+
+                <field name="chat_id" type="text"
+                       default=""
+                       label="MOD_TELEGRAM_BOT_MESSAGE_CHAT_ID_LABEL"
+                       size="5"
+                       filter="integer"
+                />
+
+                <field name="token" type="text"
+                       default=""
+                       label="MOD_TELEGRAM_BOT_MESSAGE_TOKEN_LABEL"
+                       size="5"
+                />
+
+
+                <field
+                        name="use_captcha"
+                        type="radio"
+                        layout="joomla.form.field.radio.switcher"
+                        label="MOD_TELEGRAM_BOT_MESSAGE_USE_CAPTCHA_LABEL"
+                        default="1"
+                        filter="integer"
+                >
+                    <option value="0">JHIDE</option>
+                    <option value="1">JSHOW</option>
+                </field>
+
+
+            </fieldset>
+
+
+            <fieldset name="advanced">
+                <field
+                        name="layout"
+                        type="modulelayout"
+                        label="JFIELD_ALT_LAYOUT_LABEL"
+                        description="JFIELD_ALT_MODULE_LAYOUT_DESC"
+                        validate="moduleLayout"
+                />
+
+                <field
+                        name="moduleclass_sfx"
+                        type="textarea"
+                        label="COM_MODULES_FIELD_MODULECLASS_SFX_LABEL"
+                        description="COM_MODULES_FIELD_MODULECLASS_SFX_DESC"
+                        rows="3"
+                />
+
+                <field
+                        name="cache"
+                        type="list"
+                        label="COM_MODULES_FIELD_CACHING_LABEL"
+                        description="COM_MODULES_FIELD_CACHING_DESC"
+                        default="1"
+                        filter="integer"
+                >
+                    <option value="1">JGLOBAL_USE_GLOBAL</option>
+                    <option value="0">COM_MODULES_FIELD_VALUE_NOCACHING</option>
+                </field>
+
+                <field
+                        name="cache_time"
+                        type="number"
+                        label="COM_MODULES_FIELD_CACHE_TIME_LABEL"
+                        description="COM_MODULES_FIELD_CACHE_TIME_DESC"
+                        default="900"
+                        filter="integer"
+                />
+            </fieldset>
+
+        </fields>
+    </config>
+</extension>
