@@ -23,10 +23,10 @@ namespace Joomla\Module\TelegramBotMessage\Site\Helper;
 
 use stdClass;
 use JModuleHelper;
+use Joomla\Registry\Registry;
 use Joomla\CMS\Application\WebApplication;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
-use Joomla\Registry\Registry;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\Module\TelegramBotMessage\Site\Helper\Telegram\TelegramTrait;
 
@@ -81,9 +81,8 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 
 	/**
 	 *
-	 * @return string
+	 * @return array
 	 *
-	 * @throws \JsonException
 	 * @since 4.2.0
 	 */
 	public function getAjax(): array

@@ -61,4 +61,13 @@ interface TelegramBotMessageHelperInterface
 	 */
 	public function getForm(): array;
 
+
+	/**
+	 *
+	 * @return array
+	 *
+	 * @since 4.2.0
+	 */
+	public function getAjax(): array;
+
 }

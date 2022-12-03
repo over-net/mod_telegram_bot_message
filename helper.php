@@ -16,8 +16,8 @@ use Joomla\Module\TelegramBotMessage\Site\Helper\TelegramBotMessageHelper;
 /**
  * @package
  *
- * @since       version
- * fix - because joomla 4.2.0 has a new module initialisation? but com_ajax needs old helper
+ * @since
+ * fix - because joomla 4.2.0 has a new module initialisation but com_ajax needs old helper
  */
 class helper extends TelegramBotMessageHelper
 {
