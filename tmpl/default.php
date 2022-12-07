@@ -16,11 +16,10 @@ use Joomla\Registry\Registry;
 /** @var \stdClass $module */
 /** @var Registry $params */
 
-
 ?>
 
 
-<form method="post" name="<?= $model->form->getName() ?>" id="<?= $model->form->getName() ?>-form"
+<form method="post" name="<?= $model->form->getName() ?>" class="form-validate" id="<?= $model->form->getName() ?>-form"
       enctype="multipart/form-data">
 
 	<?php echo $model->form->renderField($model::FIELD_NAME); ?>
@@ -40,6 +39,7 @@ use Joomla\Registry\Registry;
 	<?php echo JHtml::_('form.token'); ?>
 
     <div class="<?= $model->form->getName() ?>-response-result"></div>
+    <br>
 
     <button id="<?= $model->form->getName() ?>-submit" class="btn btn-lg btn-secondary" type="submit">
         <i class="fas fa-solid fa-paper-plane"></i> <?= JText::_('MOD_TELEGRAM_BOT_MESSAGE_SEND_LABEL') ?>

@@ -23,18 +23,18 @@ namespace Joomla\Module\TelegramBotMessage\Site\Helper;
 
 use stdClass;
 use JModuleHelper;
+use Joomla\CMS\Language\Text;
 use Joomla\Registry\Registry;
 use Joomla\CMS\Application\WebApplication;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
-use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\Module\TelegramBotMessage\Site\Helper\Telegram\TelegramTrait;
 
 
 /**
  * @package     Joomla\Module\TelegramBotMessage\Site\Helper
  *
- * @since       version
+ * @since       4.2.0
  */
 class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 {
@@ -52,6 +52,17 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 	 */
 	private static ?WebApplication $app = null;
 
+
+	/**
+	 * @var \string[][]
+	 * @since 4.2.0
+	 */
+	private const MSG = [
+		'success'        => 'success',
+		'warning'        => 'warning',
+		'warningCaptcha' => 'warningCaptcha',
+		'error'          => 'error',
+	];
 
 	/**
 	 * @var string
@@ -76,6 +87,7 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 		$this->bind([
 			'bindForm', 'bindStyles', 'bindScripts'
 		]);
+
 	}
 
 
@@ -91,26 +103,27 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 		$validCaptcha = false;
 		$post         = self::$app->input->getArray();
 
+		$result['type'] = self::MSG['error'];
+
 		if (isset($post['module_id']))
 		{
 			$module       = $this->getModule($post[self::FIELD_MODULE_ID]);
 			$moduleParams = new Registry($module->params);
 		}
 
-		$useCaptcha = $moduleParams->get('use_captcha');
-
-		$result['sender']['ok'] = false;
-		$result['post']         = $post;
-
-		$selectCaptcha = self::$app->getConfig()->get('captcha', '');
+		$useCaptcha = $moduleParams && $moduleParams->get('use_captcha');
 
 		if ($useCaptcha)
 		{
-			if ($selectCaptcha !== "" && $selectCaptcha !== null && !($post[self::FIELD_CAPTCHA] === ""))
+			if (isset($post[self::FIELD_CAPTCHA]) && $post[self::FIELD_CAPTCHA] !== "")
 			{
-				PluginHelper::importPlugin('captcha');
-				$validation   = self::$app->triggerEvent('onCheckAnswer', [$post[self::FIELD_CAPTCHA]]);
-				$validCaptcha = $validation[0] ?? false;
+				$config       = self::$app->getConfig()->get('captcha', '');
+				$captcha      = \JCaptcha::getInstance($config);
+				$validCaptcha = $captcha->CheckAnswer($post[self::FIELD_CAPTCHA]);
+			}
+			else
+			{
+				$result['type'] = self::MSG['warningCaptcha'];
 			}
 		}
 		else
@@ -120,16 +133,19 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 
 		if ($validCaptcha && $moduleParams instanceof Registry && isset($post[self::FIELD_NAME], $post[self::FIELD_PHONE]))
 		{
-			$message          = implode('; ', array_filter([
+			$message = implode('; ', array_filter([
 				$post[self::FIELD_NAME], $post[self::FIELD_PHONE], $post[self::FIELD_ADDITIONAL], $post[self::FIELD_ANNOTATION]
 			]));
-			$sender           = $this->telegram($moduleParams->get('token', ''))
+			$sender  = $this->telegram($moduleParams->get('token', ''))
 				->sendMessage([
 						'chat_id' => $moduleParams->get('chat_id'),
 						'text'    => $message
 					]
 				);
-			$result['sender'] = $sender;
+			if (isset($sender['ok']) && $sender['ok'] === true)
+			{
+				$result['type'] = self::MSG['success'];
+			}
 		}
 
 		return $result;
@@ -151,6 +167,34 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 
 
 	/**
+	 * @param   string  $moduleId
+	 *
+	 * @return \stdClass|null
+	 *
+	 * @since 4.2.0
+	 */
+	private function getModule(string $moduleId): ?stdClass
+	{
+		return JModuleHelper::getModuleById($moduleId);
+	}
+
+
+	/**
+	 *
+	 * @return array
+	 * @since 4.2.0
+	 */
+	private static function messages(): array
+	{
+		return [
+			self::MSG['success']        => Text::_('MOD_TELEGRAM_BOT_MESSAGE_SUCCESS'),
+			self::MSG['warning']        => Text::_('MOD_TELEGRAM_BOT_MESSAGE_WARNING'),
+			self::MSG['warningCaptcha'] => Text::_('MOD_TELEGRAM_BOT_CAPTCHA_MESSAGE_WARNING'),
+			self::MSG['error']          => Text::_('MOD_TELEGRAM_BOT_MESSAGE_ERROR')
+		];
+	}
+
+	/**
 	 * @param   array  $methods
 	 *
 	 *
@@ -169,18 +213,6 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 
 
 	/**
-	 * @param   string  $moduleId
-	 *
-	 * @return \stdClass|null
-	 *
-	 * @since 4.2.0
-	 */
-	private function getModule(string $moduleId): ?stdClass
-	{
-		return JModuleHelper::getModuleById((string) $moduleId);
-	}
-
-	/**
 	 *
 	 * @since 4.2.0
 	 */
@@ -188,7 +220,8 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 	{
 		$form = new Form("telegram", [
 			'control' => false,
-			'id'      => 'telegram'
+			'id'      => 'telegram',
+			'class'   => 'form-validate'
 		]);
 
 		$form->loadFile(JPATH_ROOT . '/modules/mod_telegram_bot_message/forms/form.xml');
@@ -214,6 +247,7 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 
 	/**
 	 *
+	 * @throws \JsonException
 	 * @since 4.2.0
 	 */
 	private function bindScripts(): void
@@ -226,9 +260,6 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 		$formId                  = '#' . $formName . '-form';
 		$formResponseResultClass = '.' . $formName . '-response-result';
 		$ajaxUrl                 = \JUri::root() . self::AJAX_URL;
-		$successMessage          = \JText::_('MOD_TELEGRAM_BOT_MESSAGE_SUCCESS');
-		$warningMessage          = \JText::_('MOD_TELEGRAM_BOT_MESSAGE_WARNING');
-		$errorMessage            = \JText::_('MOD_TELEGRAM_BOT_MESSAGE_ERROR');
 
 		// Fields
 		$name       = self::FIELD_NAME;
@@ -238,8 +269,14 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 		$moduleId   = self::FIELD_MODULE_ID;
 		$captcha    = self::FIELD_CAPTCHA;
 
+		// Add validation
+		$document->getWebAssetManager()->useScript('form.validate');
 
+		$messages = json_encode(self::messages(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+		// Add Ajax script
 		$document->getWebAssetManager()->addInlineScript("
+			const telegramMessages = $messages;
 			jQuery(document).ready(function () {
 				  jQuery('$formId').submit(function (event) {
 				    let formData = {
@@ -256,17 +293,11 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 				      data: formData,
 				      dataType: 'json',
 				      encode: false,
-				      error: function() {
-                        jQuery('$formResponseResultClass').addClass('error').html('$errorMessage');
-                      },
-                       success: function(response) {
-                        if(response.data.sender.ok === true) {
-                            jQuery('$formResponseResultClass').addClass('success').html('$successMessage');
-                        } else {
-                            jQuery('$formResponseResultClass').addClass('success').html('$warningMessage');
-                        }
-                      }
 				    }).done(function (response) {
+				        jQuery('$formResponseResultClass')
+				            .removeAttr('data-type')
+				            .attr('data-type', response.data.type)
+				            .html(telegramMessages[response.data.type]);
 				    });
 				    event.preventDefault();
 				  });

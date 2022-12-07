@@ -1,3 +1,46 @@
-#telegram-form {
+// --
+$warning: #ffc107;
+$error: #dc3545;
+$success: #28a745;
 
+// Result
+.telegram-response-result {
+  display: inline-block;
+  padding: 1rem;
+  font-size: 1rem;
+  color: white;
+  transition-duration: 0.2s;
+
+  &:empty {
+    display: none;
+  }
+}
+
+// Message
+.telegram-response-result {
+  &[data-type="warning"], &[data-type="warningCaptcha"] {
+    background: $warning !important;
+    transition-duration: 0.2s;
+  }
+
+  &[data-type="error"] {
+    background: $error !important;
+    transition-duration: 0.2s;
+  }
+
+  &[data-type="success"] {
+    background: $success !important;
+    transition-duration: 0.2s;
+  }
+}
+
+// Fields validation
+#telegram-form {
+  .invalid {
+    border-color: $error !important;
+
+    .form-control-feedback {
+      color: $error !important;
+    }
+  }
 }
