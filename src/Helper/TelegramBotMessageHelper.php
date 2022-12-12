@@ -298,6 +298,10 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 				            .removeAttr('data-type')
 				            .attr('data-type', response.data.type)
 				            .html(telegramMessages[response.data.type]);
+				            if(response.data.type === 'success') {
+						        jQuery('#captcha, #telegram-submit').hide('slow');
+						        jQuery('#captcha').parent('.controls').parent('.control-group').hide('slow');
+				            }
 				    });
 				    event.preventDefault();
 				  });
