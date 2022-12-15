@@ -68,6 +68,6 @@ interface TelegramBotMessageHelperInterface
 	 *
 	 * @since 4.2.0
 	 */
-	public function getAjax(): array;
+	public static function getAjax(): array;
 
 }

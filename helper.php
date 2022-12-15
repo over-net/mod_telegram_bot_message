@@ -21,4 +21,6 @@ use Joomla\Module\TelegramBotMessage\Site\Helper\TelegramBotMessageHelper;
  */
 class helper extends TelegramBotMessageHelper
 {
+
+
 }

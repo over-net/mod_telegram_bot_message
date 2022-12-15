@@ -23,8 +23,8 @@ namespace Joomla\Module\TelegramBotMessage\Site\Helper;
 
 use stdClass;
 use JModuleHelper;
-use Joomla\CMS\Language\Text;
 use Joomla\Registry\Registry;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Application\WebApplication;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
@@ -97,7 +97,7 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 	 *
 	 * @since 4.2.0
 	 */
-	public function getAjax(): array
+	public static function getAjax(): array
 	{
 		$moduleParams = null;
 		$validCaptcha = false;
@@ -107,7 +107,7 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 
 		if (isset($post['module_id']))
 		{
-			$module       = $this->getModule($post[self::FIELD_MODULE_ID]);
+			$module       = self::getModule($post[self::FIELD_MODULE_ID]);
 			$moduleParams = new Registry($module->params);
 		}
 
@@ -136,7 +136,7 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 			$message = implode('; ', array_filter([
 				$post[self::FIELD_NAME], $post[self::FIELD_PHONE], $post[self::FIELD_ADDITIONAL], $post[self::FIELD_ANNOTATION]
 			]));
-			$sender  = $this->telegram($moduleParams->get('token', ''))
+			$sender  = self::telegram($moduleParams->get('token', ''))
 				->sendMessage([
 						'chat_id' => $moduleParams->get('chat_id'),
 						'text'    => $message
@@ -173,7 +173,7 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 	 *
 	 * @since 4.2.0
 	 */
-	private function getModule(string $moduleId): ?stdClass
+	private static function getModule(string $moduleId): ?stdClass
 	{
 		return JModuleHelper::getModuleById($moduleId);
 	}
@@ -292,8 +292,11 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 				      url: '$ajaxUrl',
 				      data: formData,
 				      dataType: 'json',
-				      encode: false,
-				    }).done(function (response) {
+				      method : 'get',
+				      encode: true,
+				    })
+				    .done(function (response) {
+				        console.log( response  );
 				        jQuery('$formResponseResultClass')
 				            .removeAttr('data-type')
 				            .attr('data-type', response.data.type)
@@ -302,7 +305,10 @@ class TelegramBotMessageHelper implements TelegramBotMessageHelperInterface
 						        jQuery('#captcha, #telegram-submit').hide('slow');
 						        jQuery('#captcha').parent('.controls').parent('.control-group').hide('slow');
 				            }
-				    });
+				    })
+				    .fail(function() {
+                    	console.log('Oops, something went wrong!');
+                    });
 				    event.preventDefault();
 				  });
 			});
