@@ -27,7 +27,7 @@ trait TelegramTrait
 	 *
 	 * @since version
 	 */
-	final public function telegram(string $token): Telegram
+	final public static function telegram(string $token): Telegram
 	{
 		return new Telegram($token);
 	}
